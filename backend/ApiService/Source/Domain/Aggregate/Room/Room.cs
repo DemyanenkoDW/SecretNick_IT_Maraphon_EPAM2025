@@ -1,4 +1,5 @@
-﻿using CSharpFunctionalExtensions;
+﻿using System.IO.Pipelines;
+using CSharpFunctionalExtensions;
 using Epam.ItMarathon.ApiService.Domain.Abstract;
 using Epam.ItMarathon.ApiService.Domain.Builders;
 using Epam.ItMarathon.ApiService.Domain.Entities.User;
@@ -327,6 +328,57 @@ namespace Epam.ItMarathon.ApiService.Domain.Aggregate.Room
             // Call a RoomValidator to validate updated property
             return ValidateProperty(char.ToLowerInvariant(propertyName[0]) + propertyName[1..]);
         }
+ 
+public Result<Room, ValidationResult> DeleteUser(ulong? userId)
+{
+    // Check Room is not closed
+    var roomCanBeModifiedResult = CheckRoomCanBeModified();
+    if (roomCanBeModifiedResult.IsFailure)
+        return Result.Failure<Room, ValidationResult>(roomCanBeModifiedResult.Error);
+
+    if (userId is null)
+    {
+        return Result.Failure<Room, ValidationResult>(
+            new NotFoundError(new[] {
+                new ValidationFailure("user.Id", "User with the specified Id was not found in the room")
+            })
+        );
+    }
+
+    var userToDelete = Users.FirstOrDefault(u => u.Id == userId.Value);
+    if (userToDelete is null)
+    {
+        return Result.Failure<Room, ValidationResult>(
+            new NotFoundError(new[] {
+                new ValidationFailure("user.Id", "User with the specified Id was not found in the room")
+            })
+        );
+    }
+
+    // Prevent deleting admin (adjust rule if needed)
+    if (userToDelete.IsAdmin)
+    {
+        return Result.Failure<Room, ValidationResult>(
+            new BadRequestError(new[] {
+                new ValidationFailure("user.Id", "Admin cannot be deleted.")
+            })
+        );
+    }
+
+    Users.Remove(userToDelete);
+
+    // validate after change
+    var validationResult = new RoomValidator().Validate(this);
+    if (!validationResult.IsValid)
+    {
+        // rollback
+        Users.Add(userToDelete);
+        return Result.Failure<Room, ValidationResult>(validationResult);
+    }
+
+    return Result.Success<Room, ValidationResult>(this);
+}
+
 
         private Result<Room, ValidationResult> ValidateProperty(string propertyName)
         {
