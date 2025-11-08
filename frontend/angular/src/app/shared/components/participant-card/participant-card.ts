@@ -21,10 +21,13 @@ import { PopupService } from '../../../core/services/popup';
 import { copyToClipboard } from '../../../utils/copy';
 import { UrlService } from '../../../core/services/url';
 import { ParticipantInfoModal } from '../../../room/components/participant-info-modal/participant-info-modal';
+import { ParticipantTrashModal } from '../../../room/components/participant-trash-modal/participant-trash-modal';
 import { ModalService } from '../../../core/services/modal';
 import { getPersonalInfo } from '../../../utils/get-personal-info';
 import { UserService } from '../../../room/services/user';
 import type { User } from '../../../app.models';
+import type { ModalInputs } from '../../../app.models';
+
 
 @Component({
   selector: 'li[app-participant-card]',
@@ -39,6 +42,8 @@ export class ParticipantCard {
   readonly showCopyIcon = input<boolean>(false);
   readonly userCode = input<string>('');
   readonly showInfoIcon = input<boolean>(false);
+  readonly isRandomized = input<boolean>(false);
+
 
   readonly #popup = inject(PopupService);
   readonly #urlService = inject(UrlService);
@@ -58,6 +63,8 @@ export class ParticipantCard {
   public readonly ariaLabelCopy = AriaLabel.ParticipantLink;
   public readonly iconInfo = IconName.Info;
   public readonly ariaLabelInfo = AriaLabel.Info;
+  public readonly iconTrash = IconName.Trash;
+  public readonly ariaLabelTrash = AriaLabel.Trash;
 
   @HostBinding('tabindex') tab = 0;
   @HostBinding('class.list-row') rowClass = true;
@@ -114,6 +121,28 @@ export class ParticipantCard {
       );
     }
   }
+public onTrashClick(): void {
+  console.log('TRASH CLICKED ✅'); 
+  console.log('Opening modal...', ParticipantTrashModal);
+  const { id } = this.participant();
+
+  this.#modalService.openWithResult(
+    ParticipantTrashModal,
+    {
+      onConfirm: () => {
+        this.#userService.removeUser(id!).subscribe({
+          next: () => this.#modalService.close(),
+          error: () => this.#modalService.close(),
+        });
+      },
+      onCancel: () => {
+        this.#modalService.close();
+      },
+    }
+  );
+}
+
+
 
   public onCopyLeave(target: EventTarget | null): void {
     if (target instanceof HTMLElement) {
@@ -168,3 +197,4 @@ export class ParticipantCard {
     );
   }
 }
+

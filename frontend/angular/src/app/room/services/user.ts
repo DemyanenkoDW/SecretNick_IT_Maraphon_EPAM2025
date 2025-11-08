@@ -25,6 +25,7 @@ export class UserService {
   public readonly currentUser = computed(() =>
     this.users().find((user) => user.userCode === this.#userCode())
   );
+
   public readonly isAdmin = computed(
     () => this.currentUser()?.isAdmin ?? false
   );
@@ -51,6 +52,20 @@ export class UserService {
           this.getUsers().subscribe();
           this.#toasterService.show(
             ToastMessage.SuccessDrawNames,
+            MessageType.Success
+          );
+        }
+      })
+    );
+  }
+
+  public removeUser(userId: number): Observable<HttpResponse<void>> {
+    return this.#apiService.deleteUser(this.#userCode(), userId).pipe(
+      tap(({ status }) => {
+        if (status === 200) {
+          this.getUsers().subscribe();
+          this.#toasterService.show(
+            ToastMessage.SuccessUserDeleted,
             MessageType.Success
           );
         }

@@ -34,4 +34,13 @@
       (click)="onInfoClick()"
     />
   }
+
+  @if (isCurrentUserAdmin() && !participant().isAdmin) {
+    <app-icon-button
+      [iconName]="iconTrash" 
+      [ariaLabel]="ariaLabelTrash"
+      (click)="onTrashClick()"
+    />
+  }
+
 </span>
