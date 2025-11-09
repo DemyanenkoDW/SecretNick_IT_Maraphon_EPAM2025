@@ -4,6 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'app-participant-trash-modal',
   templateUrl: './participant-trash-modal.html',
   styleUrl: './participant-trash-modal.scss',
+  host: { class: 'active' } 
 })
 export class ParticipantTrashModal {
   @Input() onConfirm?: () => void;

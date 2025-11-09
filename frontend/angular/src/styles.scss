@@ -1,11 +1,23 @@
 @use 'index.scss';
 @use 'abstracts/mixins' as *;
 
+/* Базові речі, щоб layout працював передбачувано */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+/* Скрол та блокування скролу лише коли модалка АКТИВНА */
 html {
   overflow-x: hidden;
   @include custom-scrollbar;
 
-  &:has(.modal) {
+  /* Якщо модалка є і вона відкрита (має .active) — блокуємо скрол і додаємо компенсацію падінгу */
+  &:has(.modal.active) {
     overflow-y: hidden;
     padding-right: 12px;
 
@@ -13,4 +25,22 @@ html {
       padding-right: 132px;
     }
   }
+}
+
+/* Головний флекс-лейаут: хедер зверху, футер знизу, main займає решту */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Контент між хедером і футером розтягується */
+main.main {
+  flex: 1 1 auto;
+  display: block;
+}
+
+/* Футер не стискається і лишається внизу */
+app-footer {
+  flex-shrink: 0;
 }

@@ -1,20 +1,19 @@
 <app-header></app-header>
+
 <main class="main">
   <router-outlet />
+
+  @if (toast.isVisible()) {
+    <app-message
+      class="toast"
+      [type]="toast.type()"
+      [size]="SIZE_TOASTER"
+      [text]="toast.message()!"
+    />
+  }
+
+  <app-loader />
+  <app-modal-host />
 </main>
 
 <app-footer></app-footer>
-
-@if (toast.isVisible()) {
-  <app-message
-    class="toast"
-    [type]="toast.type()"
-    [size]="SIZE_TOASTER"
-    [text]="toast.message()!"
-  />
-}
-
-<app-loader />
-
-<app-modal-host />
-<router-outlet></router-outlet>
